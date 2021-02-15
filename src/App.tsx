@@ -18,9 +18,9 @@ const createGenome: (modelSource: string, flip: boolean) => FC<GenomeProps> = (
 	flip
 ) => ({ index, scale = new Vector3(1, 1, 1), ...meshProps }) => {
 	const mesh = useRef<Mesh>()
-	const phosphate = useRef<Mesh>()
+	// const phosphate = useRef<Mesh>()
 	const meshData = useFBX(modelSource)
-	const phosphateData = useFBX(models.PHOSPHATE)
+	// const phosphateData = useFBX(models.PHOSPHATE)
 
 	const flipDirection = 2 * +flip - 1
 
@@ -29,15 +29,15 @@ const createGenome: (modelSource: string, flip: boolean) => FC<GenomeProps> = (
 	const baseZConstant = flipDirection * index * increment
 	const baseRotationConstant = Math.PI / 2 + +flip * Math.PI
 	useEffect(() => {
-		if (mesh.current && phosphate.current) {
+		if (mesh.current /* && phosphate.current */) {
 			mesh.current.rotation.y = baseRotationConstant
 			mesh.current.rotation.z = baseZConstant
 
-			phosphate.current.rotation.y = baseRotationConstant
-			phosphate.current.rotation.z = baseZConstant
+			// phosphate.current.rotation.y = baseRotationConstant
+			// phosphate.current.rotation.z = baseZConstant
 
 			mesh.current.visible = true
-			phosphate.current.visible = true
+			// phosphate.current.visible = true
 		}
 		return () => {}
 	}, [])
@@ -46,14 +46,14 @@ const createGenome: (modelSource: string, flip: boolean) => FC<GenomeProps> = (
 		const directionConstant = 0.005 * flipDirection
 		if (
 			mesh.current &&
-			mesh.current.rotation.y &&
-			phosphate.current &&
-			phosphate.current.rotation.y
+			mesh.current.rotation.y // &&
+			// phosphate.current &&
+			// phosphate.current.rotation.y
 		) {
 			const now = Date.now() / 10
 
 			mesh.current.rotation.z = now * 0.005 * flipDirection + baseZConstant
-			phosphate.current.rotation.z = now * 0.005 * flipDirection + baseZConstant
+			// phosphate.current.rotation.z = now * 0.005 * flipDirection + baseZConstant
 		}
 	})
 
@@ -68,13 +68,13 @@ const createGenome: (modelSource: string, flip: boolean) => FC<GenomeProps> = (
 				scale={activeScale}
 				visible={false}
 			/>
-			<mesh
+			{/* <mesh
 				{...phosphateData.children[0]}
 				{...meshProps}
 				ref={phosphate}
 				scale={activeScale}
 				visible={false}
-			/>
+			/> */}
 		</>
 	)
 }
@@ -177,7 +177,9 @@ function App() {
 				onWheel={(ev) => {
 					const increment = scrollRef.current + ev.deltaY * 0.01
 					if (increment > 0) scrollRef.current = increment
-				}}>
+				}}
+				orthographic
+				camera={{ zoom: 120 }}>
 				<ambientLight intensity={0.4} />
 				<pointLight position={[10, 10, 10]} />
 				<ScrollController
@@ -203,7 +205,11 @@ function App() {
 								base={base}
 								index={i}
 								position={
-									new Vector3(i - onScreenCount / 2 /*+ increment */, 0, 0)
+									new Vector3(
+										(i - onScreenCount / 2) * 0.75 /*+ increment */,
+										0,
+										0
+									)
 								}
 							/>
 						))}

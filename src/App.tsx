@@ -18,8 +18,8 @@ const createGenome: (modelSource: string, flip: boolean) => FC<GenomeProps> = (
 	flip
 ) => ({ index, scale = new Vector3(1, 1, 1), ...meshProps }) => {
 	const mesh = useRef<Mesh>()
-	// const phosphate = useRef<Mesh>()
 	const meshData = useFBX(modelSource)
+	// const phosphate = useRef<Mesh>()
 	// const phosphateData = useFBX(models.PHOSPHATE)
 
 	const flipDirection = 2 * +flip - 1
@@ -29,7 +29,10 @@ const createGenome: (modelSource: string, flip: boolean) => FC<GenomeProps> = (
 	const baseZConstant = flipDirection * index * increment
 	const baseRotationConstant = Math.PI / 2 + +flip * Math.PI
 	useEffect(() => {
-		if (mesh.current /* && phosphate.current */) {
+		if (
+			mesh.current
+			// && phosphate.current
+		) {
 			mesh.current.rotation.y = baseRotationConstant
 			mesh.current.rotation.z = baseZConstant
 
@@ -46,14 +49,14 @@ const createGenome: (modelSource: string, flip: boolean) => FC<GenomeProps> = (
 		const directionConstant = 0.005 * flipDirection
 		if (
 			mesh.current &&
-			mesh.current.rotation.y // &&
-			// phosphate.current &&
+			mesh.current.rotation.y
+			// && phosphate.current &&
 			// phosphate.current.rotation.y
 		) {
 			const now = Date.now() / 10
 
-			mesh.current.rotation.z = now * 0.005 * flipDirection + baseZConstant
-			// phosphate.current.rotation.z = now * 0.005 * flipDirection + baseZConstant
+			mesh.current.rotation.z = now * directionConstant + baseZConstant
+			// phosphate.current.rotation.z = now * directionConstant + baseZConstant
 		}
 	})
 
@@ -87,6 +90,13 @@ const [AT, TA] = createPair(models.AT)
 const [CG, GC] = createPair(models.CG)
 const [AU, UA] = createPair(models.AU)
 
+const A = createGenome(models.A, false)
+const T = createGenome(models.T, false)
+const U = createGenome(models.U, false)
+
+const C = createGenome(models.C, false)
+const G = createGenome(models.G, false)
+
 const Genome = ({ base, ...props }: GenomeProps & { base: string }) => {
 	const isRareBase = useRef(Math.random() > 0.999)
 	switch (base) {
@@ -102,6 +112,17 @@ const Genome = ({ base, ...props }: GenomeProps & { base: string }) => {
 
 		case 'U':
 			return <UA {...props} />
+
+		case 'a':
+			return <A {...props} />
+		case 't':
+			return <T {...props} />
+		case 'u':
+			return <U {...props} />
+		case 'c':
+			return <C {...props} />
+		case 'g':
+			return <G {...props} />
 
 		default:
 			return <></>
@@ -155,19 +176,25 @@ function App() {
 
 	const [viewEntry, setViewEntry] = useState(0)
 
-	const [genome, setGenome] = useState('')
+	const [genome, setGenome] = useState(
+		' '.repeat(onScreenCount / 2) + 'TAC CCT GGG aug gga ccc'
+	)
 
 	useEffect(() => {
-		fetch(process.env.PUBLIC_URL + '/data').then((x) =>
-			x.text().then((data) => setGenome(' '.repeat(onScreenCount / 2) + data))
-		)
+		// fetch(process.env.PUBLIC_URL + '/data').then((x) =>
+		// 	x.text().then((data) => setGenome(' '.repeat(onScreenCount / 2) + data))
+		// )
+		onkeypress = (ev) => {
+			console.log(ev.code)
+			if (ev.code === 'KeyD') changeScroll(1)
+			if (ev.code === 'KeyA') changeScroll(-1)
+		}
 	}, [])
 
-	// useEffect(() => {
-	// 	if (translationGroupRef.current) {
-	// 		translationGroupRef.current.position.x = scrollValue * 1
-	// 	}
-	// }, [scrollValue])
+	const changeScroll = (_increment: number) => {
+		const increment = scrollRef.current + _increment
+		if (increment > 0) scrollRef.current = increment
+	}
 
 	console.log(Math.max(loadLength * (viewEntry - 1), 0))
 
@@ -175,8 +202,8 @@ function App() {
 		<div className='container'>
 			<Canvas
 				onWheel={(ev) => {
-					const increment = scrollRef.current + ev.deltaY * 0.01
-					if (increment > 0) scrollRef.current = increment
+					const increment = ev.deltaY * 0.01
+					changeScroll(increment)
 				}}
 				orthographic
 				camera={{ zoom: 120 }}>
